@@ -1,85 +1,39 @@
-var canvas = document.getElementById('canvas');
-var ctx = canvas.getContext('2d');
+const baa = document.getElementById("baa");
+const fence = document.getElementById("fence");
+let score = 0;
 
-canvas.width = window.innerWidth -100;
-canvas.height = window.innerHeight -100;
-
-// 공룡이 
-//ctx.fillStyle = 'green';
-//ctx.fillRect(10, 10, 100, 100);
-
-var baa = {
-    x:10,
-    y:200,
-    width:50,
-    height:50,
-    draw(){
-        ctx.fillStyle = 'green';
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
-}
-
-class Fence{
-    constructor(){
-        this.x = 500;
-        this.y = 200;
-        this.width = 50;
-        this.height = 50;
-    }
-    draw(){
-        ctx.fillStyle = 'blue';
-        ctx.fillRect(this.x, this.y, this.width, this.height);
-    }
-}
-
-var timer = 0;
-var fences = [];
-var jumpTimer = 0;
-
-var jumpping = false;
-document.addEventListener('keydown', function(e){
-    if(e.code === 'Space'){
-        jumpping = true;
-    }
-}); 
-
-// 프레임마다 실행할 것 
-function comming() {
-    requestAnimationFrame(comming);
-    timer++;
-    ctx.clearRect(0, 0, canvas.width, canvas.height);
+function jump() {
+    // 3초 안에 두번 점프하면 initiate 되지 않도록 
+    if(baa.classList!="jump"){
+        baa.classList.add("jump");
     
-    if(timer%240 === 0){
-        var fence = new Fence();
-        fences.push(fence);
+        // 3초 뒤 jump 클래스 제거 
+        setTimeout(function(){
+            baa.classList.remove("jump");
+        },500);
     }
-
-    fences.forEach((a, i, o)=>{
-        // x 좌표가 0 미만이면 제거
-        if(a.x<0){
-            o.splice(i, 1)
-        }
-        a.x--;
-        a.draw();
-    });
-
-    if(jumpping==true){
-        baa.y-=3;
-        jumpTimer++;
-    }
-
-    if(jumpping==false){
-        if(baa.y < 200){
-            baa.y+=3;
-        }
-    }
-
-    if(jumpTimer > 50){
-        jumpping = false;
-        jumpTimer = 0;
-    }
- 
-    baa.draw();
 }
-comming();
 
+let isAlive = setInterval(function(){
+    score++;
+
+    let baaLeft = parseInt(window.getComputedStyle(baa).getPropertyValue("left"));
+    let baaTop = parseInt(window.getComputedStyle(baa).getPropertyValue("top"));
+    let fenceTop = parseInt(window.getComputedStyle(fence).getPropertyValue("top"));
+    let fenceLeft = parseInt(window.getComputedStyle(fence).getPropertyValue("left"));
+
+    let diffX = fenceLeft-(baaLeft);
+    let diffY = fenceTop-(baaTop+50);
+
+    //direct collision
+    if(diffX<0 && diffY<0){
+        // console.log("collision");
+        alert("Game Over!! Score = " + score);
+        score = 0;
+        window.getComputedStyle(fence).setPropertyValue("left", 600);
+    }
+});
+
+document.addEventListener("keydown", function(event){
+    jump();
+});
